@@ -176,7 +176,8 @@ def create_app(test_config=None):
             if search_term:
                 search_result = Question.query.filter(
                     Question.question.ilike(f'%{search_term}%')).all()
-                paginated_questions = paginate_questions(request, search_result)
+                paginated_questions = paginate_questions(
+                    request, search_result)
                 if len(search_result) > 0:
                     return jsonify({
                         'questions': paginated_questions,
@@ -185,12 +186,12 @@ def create_app(test_config=None):
                     })
                 else:
                     return jsonify({
-                    'questions': [],
-                    'totalQuestions': 0,
-                    'currentCategory': None})
+                        'questions': [],
+                        'totalQuestions': 0,
+                        'currentCategory': None})
             else:
                 abort(400)
-        except:
+        except BaseException:
             abort(422)
     """
     @TODO:
@@ -243,7 +244,6 @@ def create_app(test_config=None):
             question = random.choice(all_questions)
             if not str(question.id) in prev_questions:
                 curr_question = question.format()
-                #curr_question = question
                 break
         return curr_question
 
@@ -255,11 +255,11 @@ def create_app(test_config=None):
             previous_questions = body.get('previous_questions', None)
             if not('quiz_category' in body and 'previous_questions' in body):
                 abort(422)
-          
+
             question = get_random_question(previous_questions, category)
             return jsonify({
-                    'questions': question,
-                    'success': True })
+                'questions': question,
+                'success': True})
 
         except BaseException:
             abort(404)

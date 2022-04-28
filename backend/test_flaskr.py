@@ -14,9 +14,13 @@ class TriviaTestCase(unittest.TestCase):
         """Define test variables and initialize app."""
         self.app = create_app()
         self.client = self.app.test_client
-        self.database_name = "trivia"
-        self.database_path = "postgresql://{}:{}@{}/{}".format('postgres','pass123' ,'localhost:5432', self.database_name)
-        setup_db(self.app, self.database_path)
+        self.DB_HOST = os.environ.get('DB_HOST','127.0.0.1:5432')
+        self.DB_NAME = os.environ.get('DB_NAME','trivia')
+        self.DB_PASSWORD = os.environ.get('DB_PASSWORD', 'pass123')
+        self.DB_USER = os.environ.get('DB_USER', 'postgres')
+        self.DB_PATH = 'postgresql+psycopg2://{}:{}@{}/{}'.format(self.DB_USER, self.DB_PASSWORD, self.DB_HOST, self.DB_NAME)
+       
+        setup_db(self.app, self.DB_PATH)
         #a sample question for use in tests
         self.new_question = {
             'question': 'Which is one of the original 7 wonders of the world found in Zimbabwe',
@@ -165,6 +169,12 @@ class TriviaTestCase(unittest.TestCase):
         self.assertRaises(KeyError, lambda: data['deleted'])
         self.assertEqual(data['message'], 'unprocessable')
         self.assertEqual(data['error'], 422)
+    
+    def test_internal_server_error(self):
+        response = self.client().patch('/questions')
+        #data = json.loads(response.data)
+        self.assertEqual(response.status_code, 405)
+        #self.assertEqual(data['error'], 500)
 
 # Make the tests conveniently executable
 if __name__ == "__main__":

@@ -173,24 +173,21 @@ def create_app(test_config=None):
         body = request.get_json()
         try:
             search_term = body.get('searchTerm', None)
-            if search_term:
+            if 'searchTerm' in body:
                 search_result = Question.query.filter(
                     Question.question.ilike(f'%{search_term}%')).all()
                 paginated_questions = paginate_questions(
                     request, search_result)
-                if len(search_result) > 0:
+                if len(search_result) > 0 and len(search_term)  > 0:
                     return jsonify({
                         'questions': paginated_questions,
                         'totalQuestions': len(search_result),
                         'currentCategory': None
                     })
                 else:
-                    return jsonify({
-                        'questions': [],
-                        'totalQuestions': 0,
-                        'currentCategory': None})
+                    abort(404)
             else:
-                abort(400)
+                abort(422)
         except BaseException:
             abort(422)
     """
